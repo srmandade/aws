@@ -1,0 +1,21 @@
+NFS 
+step1 : launch instance server-01 and clinet-02 
+with security group of nfs and new key pair
+
+step2 : EFS--->then create file system
+-->nfs(none)-->click nfs -->Network-->manage--->
+select security group with AZ-->attach
+
+step3 : start mobaexterm with instance public 
+ip of the server and client instance
+
+server: sudio -i
+       	mkdir /jack   (create a directory)
+	cd /jack       (change dir)
+	touch file{1..10} (create files)
+	ls /jack          (list files)
+	yum install amazon-efs-utils -y  (install efs)
+	mount -t efs port id:/ /jack      (mount files)
+	ls /jack   
+	df-hT
+same steps for client
