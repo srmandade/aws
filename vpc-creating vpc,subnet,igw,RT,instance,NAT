@@ -1,0 +1,32 @@
+VPC-creating vpc,subnet,igw,RT,instance,NAT
+<----VPC Steps---->
+create vpc---->vpc_name {my-vpc-01}---->IPV4 CIDR---->{192.168.0.17}---->click--->{no-ipv6}
+Tenancy--->Default---->create VPC
+
+subnet--->create subnet-1---->VPC id select--->subnet_name{my-public-subnet}---->AZs-->{east-1a}
+---->ipv4 CIDR-block --->192.168.0.0/19--->
+---->add-subnet-2---->my-private-subnet-2---->AZs{east-2b}---->ipv4-cidr-block--->{192.168.0.33/19}----->(create-sbunet)
+
+instance----launch-instance---->name{vpc-instance}----network-setting--->vpc--->select vpc---->auto assign public IP
+---->Enable------>select subnet---->Launch Instance
+
+Create-Internet Gateway
+name---->create
+select-->action---->attach to VPC
+
+Route---route table-----0.0.0.0/0 select igw----create
+
+--->go to mobaexterm ----> copy public ip and take ssh
+--->private ip access---->sudo ssh-i /home/ec2-user/key-pair-name ec2-user@private-ip
+
+Attached NAT Gateway---->create nat gateway-->name{my-first-nat-gw---->select-subnet---->public-subnet---select Elastic IP allocation id---->create
+
+create Route Table----name{sub-RT}--->vpc select---->create
+select created RT--->go to subnet association---->select private-subnet---save association
+
+route table---->sub-RT{click}---->add route--->0.0.0.0/0----->select NAT gateway---->save changes
+
+--->go to mobaexterm ----> copy public ip and take ssh---->ping www.google.com
+--->private ip access---->sudo ssh-i /home/ec2-user/key-pair-name ec2-user@private-ip----->ping www.google.com
+
+{NAT gateway it is used to access internet for private ip}
