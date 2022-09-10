@@ -1,0 +1,125 @@
+-----------------------------TOMCAT WITH RDS INTEGRATION-------------------------------------
+1) IN RDS
+   First of all create database in rds (recommded free tier to save cost). Anyways let 
+   move on 
+2) launch a virtual manchine (ec2-instance) I am using ubuntu ami you can use any.
+
+3) Before moving we should have  things mysql_connector.jar ( libary) , application (student.war),
+
+4) Now in ec2 manchine create a java enviornment by using command
+   $ sudo apt update                 // Update system packages.
+   $ sudo apt install default-jdk -y // Install Java runtime environment.
+   $ java -version                   // Verify Java installation.
+
+5) now install tomcat Download the latest version of Apache Tomcat. To find the latest Tomcat version, 
+   visit the official download page. we are using "TOMCAT 8"
+   $wget https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.82/bin/apache-tomcat-8.5.82.tar.gz
+   $ sudo tar xzvf apache-tomcat-10.0.8.tar.gz     //Extract the downloaded archive.
+   $ sudo mkdir /opt/tomcat/                       //Create an installation directory /opt/tomcat/.
+   $ sudo mv apache-tomcat-10.0.8/* /opt/tomcat/   //Move the extracted files to the installation directory.
+
+6) conf------> main configuration file
+   webapps----> root directory
+   catalina.out----> main log file
+   lib---------->  Tomcat library
+   logs----------> Tomcat logs
+   bin-----------> Tomcat related script (command)
+
+7) By default tomcat does not have "deamon"  so we have to start from bin
+   ./bin/catalina.sh start
+   
+         or
+
+   ./bin/startup.sh start
+  -------------[SKIP TO POINT NO. 9]-------------------------
+
+8) OR you can create systemd file
+   Create a systemd unit file for Apache Tomcat.
+   $ sudo nano /etc/systemd/system/tomcat.service
+   Add the code below to the file. Then, save and close the file.
+   [Unit]
+   Description=Tomcat
+   After=network.target
+
+   [Service]
+   Type=forking
+
+   User=root
+   Group=root
+
+   Environment="JAVA_HOME=/usr/lib/jvm/java-1.11.0-openjdk-amd64"
+   Environment="JAVA_OPTS=-Djava.security.egd=file:///dev/urandom"
+   Environment="CATALINA_BASE=/opt/tomcat"
+   Environment="CATALINA_HOME=/opt/tomcat"
+   Environment="CATALINA_PID=/opt/tomcat/temp/tomcat.pid"
+   Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+
+   ExecStart=/opt/tomcat/bin/startup.sh
+   ExecStop=/opt/tomcat/bin/shutdown.sh
+
+   [Install]
+   WantedBy=multi-user.target
+
+
+   Reload the systemd daemon service to apply changes.
+
+   $ sudo systemctl daemon-reload
+   Start Apache Tomcat service.
+
+   $ sudo systemctl start tomcat
+   Enable the service to start up on system boot.
+
+   $ sudo systemctl enable tomcat
+   Check the status of the service.
+
+   $ sudo systemctl status tomcat
+
+9)Application will be stored in webapps
+  now in mobaxterm upload the file "student.war" , move to webapps , in webapps the "student.war" it will extract to "student"
+  
+
+10) Now in lib directory add "mysql_connector.jar file"
+
+
+11) Now  http://---IP-ADDRESS:8080/student
+    you will see registration form , fill the form, it will say "unable to save record"
+    because we have not integrated database in it.
+
+12) apt-get install mysql-server -y // install mysql
+    mysql -h ENDPOINT -uadmin -p
+    Now in it run
+    > CREATE DATABSE Studentapp;   
+    > USE Studentap;
+    >CREATE TABLE if not exists students(student_id INT NOT NULL AUTO_INCREMENT,
+	student_name VARCHAR(100) NOT NULL,
+        student_addr VARCHAR(100) NOT NULL,
+	student_age VARCHAR(3) NOT NULL,
+	student_qual VARCHAR(20) NOT NULL,
+	student_percent VARCHAR(10) NOT NULL,
+	student_year_passed VARCHAR(10) NOT NULL,
+	PRIMARY KEY (student_id)
+);
+
+13) AFter we have make changes in configuration file that is context.xml
+    vi conf/context.xml
+    vim context.xml
+			<Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource"
+               maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+               username="USERNAME" password="PASSWORD" driverClassName="com.mysql.jdbc.Driver"
+               url="jdbc:mysql://DB-ENDPOINT:3306/DATABASE"/>
+ 
+14) After doing some changes in configuration files we have to restart the service
+    ./bin/catalina.sh stop
+    ./bin/catalina.sh start
+
+
+
+
+
+    
+   
+
+   
+  
+  
+   
